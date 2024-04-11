@@ -8,6 +8,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.enableCors({
+    origin: 'http://localhost:5173',
+  });
   const config = new DocumentBuilder()
     .setTitle('Medium API')
     .setDescription('The Medium API description')
