@@ -1,0 +1,16 @@
+services:
+  db:
+    container_name: split-n-go-backend-db
+    image: postgres:16.1
+    environment:
+      POSTGRES_USER: chamara
+      POSTGRES_PASSWORD: Chathu123
+      PGDATA: /data/postgres
+    volumes:
+      - splitdb:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  medium:
