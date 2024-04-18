@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
 import { JWT_SECRET } from '@app/config';
-import { UserResponseI } from '@app/user/types/user-response.interface';
+import { IUserResponse } from '@app/user/types/user-response.interface';
 import { LoginUserDto } from '@app/user/dto/LoginUserDto';
 import * as bcrypt from 'bcrypt';
 
@@ -42,6 +42,7 @@ export class UserService {
   async getUserByEmail(email: string): Promise<UserEntity | null> {
     return await this.userRepository.findOne({
       where: { email },
+      select: ['id', 'username', 'email', 'password', 'bio', 'image'],
     });
   }
 
@@ -51,7 +52,7 @@ export class UserService {
     });
   }
 
-  async buildResponse(user: UserEntity): Promise<UserResponseI> {
+  async buildResponse(user: UserEntity): Promise<IUserResponse> {
     return {
       user: {
         ...user,
@@ -60,11 +61,11 @@ export class UserService {
     };
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<UserResponseI> {
+  async login(loginUserDto: LoginUserDto): Promise<IUserResponse> {
     const user = await this.getUserByEmail(loginUserDto.email);
     if (!user) {
       throw new HttpException(
-        'User with this email does not exist',
+        'invalid email or password',
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
@@ -74,10 +75,15 @@ export class UserService {
     );
     if (!isPasswordValid) {
       throw new HttpException(
-        'Invalid password',
+        'invalid email or password',
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
+    delete user.password;
     return this.buildResponse(user);
+  }
+
+  async getUserById(id: number): Promise<UserEntity> {
+    return this.userRepository.findOne({ where: { id } });
   }
 }
